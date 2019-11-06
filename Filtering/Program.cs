@@ -12,89 +12,131 @@ namespace Filtering
         {
             var filters2 = new List<Tech>();
 
-            filters2.Add(new Tech(){Duration = 1, Name = "Java"});
-            filters2.Add(new Tech(){Duration = 1, Name = "C#"});
+            filters2.Add(new Tech(){ExperienceYears = 1, Name = "Java"});
+            filters2.Add(new Tech(){ExperienceYears = 1, Name = "C#"});
 
             
             
 
             
 
-            var cands= new List<Cand>();
+            var cands= new List<Candidate>();
             
             cands.Add(
-                new Cand()
+                new Candidate()
                 {
                     Name = "A",
                     Techs = new List<Tech>()
                     {
-                        new Tech(){Duration = 1, Name = "Java"}
+                        new Tech(){ExperienceYears = 1, Name = "Java"}
                     }
                 }
                 );
 
             cands.Add(
-                new Cand()
+                new Candidate()
                 {
                     Name = "B",
                     Techs = new List<Tech>()
                     {
-                        new Tech(){Duration = 5, Name = "Java"}
+                        new Tech(){ExperienceYears = 5, Name = "Java"}
                     }
                 }
             );
 
             cands.Add(
-                new Cand()
+                new Candidate()
                 {
                     Name = "C",
                     Techs = new List<Tech>()
                     {
-                        new Tech(){Duration = 5, Name = "C#"}
+                        new Tech(){ExperienceYears = 5, Name = "C#"}
                     }
                 }
             );
 
             cands.Add(
-                new Cand()
+                new Candidate()
                 {
                     Name = "D",
                     Techs = new List<Tech>()
                     {
-                        new Tech(){Duration = 3, Name = "C#"}
+                        new Tech(){ExperienceYears = 3, Name = "C#"},
+                        new Tech(){ExperienceYears = 2, Name = "Java"},
                     }
                 }
             );
 
-            var filters = new List<Func<Cand, Tech>>();
+            //var filters = new List<Func<Candidate, Tech>>();
+            //var result = FilterCands(cands, filters, new Tech());
+
+            var f1 = new Filter(){Duration = 1, Name="C#"};
+            var f2 = new Filter(){Duration = 1, Name="Java"};
+            //var f3 = new Filter(){Duration = 1, Name="Javascript"};
             
+            var filters = new List<Filter>() {f1,f2};
 
-            var result = FilterCands(cands, filters, new Tech());
+            var r = cands.Where(AppropriateExperienceExists(filters));
+
+
+
+
+
+
 
         }
 
-
-        public static IEnumerable<Cand> FilterCands (IEnumerable<Cand> cands, IEnumerable<Func<Cand, Tech>> filters, Tech filterValue)
+        static Func<Candidate, bool> AppropriateExperienceExists(List<Filter> filters)
         {
-            foreach (var filter in filters)
+            Func<Candidate, bool> complexFilter = cand =>
             {
-                cands = cands.Where(d => filter(d).Duration >(filterValue.Duration) & filter(d).Name == filterValue.Name);
-            }
+                foreach (var filter in filters)
+                {
+                    bool found = false;
+                    
+                    foreach (var tech in cand.Techs)
+                    {
+                        if (tech.Name == filter.Name & tech.ExperienceYears >= filter.Duration)
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
 
-            return cands;
+                    if (!found)
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            };
+
+            return complexFilter;
         }
 
-        
+
+
+
+
+
+
+
 
     }
 
     public class Tech
     {
         public string Name { get; set; }
+        public int ExperienceYears { get; set; }
+    }
+
+    public class Filter
+    {
+        public string Name { get; set; }
         public int Duration { get; set; }
     }
 
-    public class Cand
+    public class Candidate
     {
         public string Name { get; set; }
         public List<Tech> Techs { get; set; }
